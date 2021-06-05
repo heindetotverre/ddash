@@ -1,0 +1,19 @@
+.group {
+  display: flex;
+
+  &--icons {
+    justify-content: space-between;
+  }
+}
+
+.right {
+  text-align: right;
+}
+
+.padded {
+  padding: 20px;
+
+  &--small {
+    padding: 10px;
+  }
+}

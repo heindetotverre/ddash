@@ -1,0 +1,9 @@
+.link {
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: border-bottom 0.25s ease;
+
+  &:hover {
+    border-color: black;
+  }
+}

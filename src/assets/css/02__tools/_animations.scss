@@ -1,0 +1,23 @@
+.animate {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.15s ease;
+  width: 300px;
+}
+
+.rotating {
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-name: rotating;
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

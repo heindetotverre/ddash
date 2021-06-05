@@ -1,0 +1,47 @@
+.icon {
+  display: flex;
+  transition: all ease 0.2s;
+
+  &--svg {
+    height: 15px;
+    width: 15px;
+  }
+
+  &--text .icon--svg {
+    margin-right: 5px;
+  }
+
+  svg {
+    height: 100%;
+    width: 100%;
+  }
+
+  &--link {
+    > div:not(.icon--svg) {
+      border-bottom: 1px solid transparent;
+      transition: border-bottom 0.25s ease;
+    }
+  }
+
+  &--link:hover {
+    cursor: pointer;
+    transform: translate(0, -1px);
+
+    > div:not(.icon--svg) {
+      border-color: black;
+    }
+  }
+
+  &--disabled {
+    color: $c3;
+
+    &:hover {
+      cursor: not-allowed;
+      transform: translate(0, 0);
+
+      > div:not(.icon--svg) {
+        border-color: transparent;
+      }
+    }
+  }
+}
