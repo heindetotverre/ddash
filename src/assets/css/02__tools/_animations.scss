@@ -1,8 +1,8 @@
 .animate {
   height: 0;
   overflow: hidden;
-  transition: height 0.15s ease;
-  width: 300px;
+  transition: height $transition-speed--xs ease;
+  width: $list-width--base;
 }
 
 .rotating {

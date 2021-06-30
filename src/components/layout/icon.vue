@@ -1,9 +1,9 @@
 <template>
   <div class="icon" :class="classes">
     <div class="icon--svg">
-      <svg><use :href="`${getSpriteUrl}#${imageId}`"></use></svg>
+      <svg><use :href="`${getSpriteUrl}#${image}`"></use></svg>
     </div>
-    <div v-if="textRef">{{ textRef }}</div>
+    <div v-if="text">{{ text }}</div>
   </div>
 </template>
 <script lang="ts">
@@ -15,7 +15,7 @@ export default defineComponent({
       type: String,
       required: true
     },
-    type: {
+    iconType: {
       type: String
     },
     text: {
@@ -29,11 +29,9 @@ export default defineComponent({
   setup(props) {
     const classes = ref('')
     const getSpriteUrl = ref('/img/svg/sprite.svg')
-    const imageId = ref(props.image)
-    const textRef = ref(props.text)
 
     const setClasses = () => {
-      classes.value = `${props.type ? 'icon--link' : ''} 
+      classes.value = `${props.iconType ? 'icon--link' : ''} 
         icon--${props.image} 
         ${props.text ? 'icon--text' : ''}
         ${props.disabled ? 'icon--disabled' : ''}`
@@ -49,9 +47,7 @@ export default defineComponent({
 
     return {
       classes,
-      getSpriteUrl,
-      imageId,
-      textRef
+      getSpriteUrl
     }
   }
 })

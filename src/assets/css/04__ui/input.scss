@@ -1,0 +1,32 @@
+.form__input {
+  input:not([type='checkbox']) {
+    border: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    border-radius: $border-radius--xs;
+    padding: $spacing--xxxs;
+    outline: 0;
+    transition: all $transition-speed--m ease;
+    width: 100%;
+
+    &:hover {
+      border-bottom: 1px solid $c3;
+      border-right: 1px solid $c3;
+    }
+
+    &:focus {
+      border: 1px solid $c3;
+    }
+  }
+
+  &--error {
+    input:not([type='checkbox']) {
+      border: 1px solid red;
+    }
+  }
+}
+
+.form__tick {
+  input:disabled {
+    pointer-events: none;
+  }
+}

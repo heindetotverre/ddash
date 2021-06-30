@@ -1,0 +1,214 @@
+[
+  {
+    "name": "CreateList",
+    "fields": [
+      {
+        "name": "listName",
+        "label": "Name for list",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter a name for a list to grab",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "listUrl",
+        "label": "Url to grab",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter a url to grab from (https://www.etc)",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "listSelector",
+        "label": "List selector",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter a selector for a list you want to grab",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "itemSelector",
+        "label": "Item selector",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter a selector for an item in your list",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "titleSelector",
+        "label": "Title selector",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter a selector for the title of your item",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "linkSelector",
+        "label": "Link selector",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter a selector for the link in your item",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "cookieWallAcceptSelector",
+        "label": "Accept Cookies Selector",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter a selector for the accept button in the cookie wall, if present",
+        "required": false,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "saveList",
+        "label": "Tick to save your list settings",
+        "component": "Tick",
+        "type": "checkbox",
+        "description": "Enter a selector for the link in your item",
+        "required": false,
+        "validator": "notempty",
+        "disabled": true
+      }
+    ],
+    "buttons": []
+  },
+  {
+    "name": "SignIn",
+    "fields": [
+      {
+        "name": "userName",
+        "label": "Enter your username",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter your registrated user name or email",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "password",
+        "label": "Enter your password",
+        "component": "Input",
+        "type": "password",
+        "description": "Enter your registrated password",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      }
+    ],
+    "icons": [
+      {
+        "iconName": "signInIcon",
+        "iconType": "link",
+        "image": "sign-in",
+        "text": "Sign in",
+        "function": "signIn"
+      },
+      {
+        "iconName": "signInIcon",
+        "iconType": "link",
+        "image": "sign-up",
+        "text": "Sign up",
+        "function": "signUp"
+      },
+      {
+        "iconName": "cancelSignInIcon",
+        "iconType": "link",
+        "image": "cancel-sign-in",
+        "text": "Cancel",
+        "function": "cancelSignIn"
+      }
+    ]
+  },
+  {
+    "name": "SignUp",
+    "fields": [
+      {
+        "name": "firstName",
+        "label": "Enter your first name",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter your first name or make something up",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "lastName",
+        "label": "Enter your last name",
+        "component": "Input",
+        "type": "text",
+        "description": "Enter your last name or make something up",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "email",
+        "label": "Enter your email",
+        "component": "Input",
+        "type": "email",
+        "description": "Enter your email or any email to verify your account to",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "password",
+        "label": "Enter your password",
+        "component": "Input",
+        "type": "password",
+        "description": "Make up some password or use your manager",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      },
+      {
+        "name": "passwordCheck",
+        "label": "Enter your password again",
+        "component": "Input",
+        "type": "password",
+        "description": "Enter the same password again to make sure you didn't enter a typo",
+        "required": true,
+        "validator": "notempty",
+        "disabled": false
+      }
+    ],
+    "icons": [
+      {
+        "iconName": "signInIcon",
+        "iconType": "link",
+        "image": "sign-in",
+        "text": "Sign in",
+        "function": "signIn"
+      },
+      {
+        "iconName": "signInIcon",
+        "iconType": "link",
+        "image": "sign-up",
+        "text": "Sign up",
+        "function": "signUp"
+      },
+      {
+        "iconName": "cancelSignInIcon",
+        "iconType": "link",
+        "image": "cancel-sign-in",
+        "text": "Cancel",
+        "function": "cancelSignIn"
+      }
+    ]
+  }
+]

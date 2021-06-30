@@ -4,11 +4,12 @@
   </label>
   <div :class="`form__tick ${setClasses()}`">
     <input
-      @input="onInput($event)"
+      @input.prevent="onInput($event)"
       @focus="onFocus()"
-      :checked="false"
       :type="'checkbox'"
       :id="id"
+      :checked="modelValue"
+      :disabled="disabled"
     />
   </div>
 </template>
@@ -17,7 +18,7 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'Tick',
-  emits: ['input', 'focus', 'blur'],
+  emits: ['update:modelValue', 'focus', 'blur'],
   props: {
     id: {
       type: String,
@@ -34,12 +35,29 @@ export default defineComponent({
     name: {
       type: String,
       required: true
+    },
+    required: {
+      type: Boolean,
+      required: true
+    },
+    disabled: {
+      type: Boolean,
+      required: true
+    },
+    modelValue: {
+      type: Boolean
+    },
+    validation: {
+      type: String
+    },
+    renderValidation: {
+      type: Boolean
     }
   },
   setup(props, { emit }) {
     const onInput = (event: Event) => {
       const target = event.target as HTMLInputElement
-      emit('input', target.checked)
+      emit('update:modelValue', target.checked)
     }
 
     const onFocus = () => {

@@ -1,49 +1,32 @@
 <template>
   <div class="animate" ref="animateRef">
     <div class="ddash__list" ref="listRef" :id="id">
-      <div class="group group--icons padded--small fixed">
-        <Icon
-          v-if="status === 'init'"
-          @click="createList"
-          type="link"
-          image="add-rounded"
-          text="Create list"
-        />
-        <Icon
-          v-if="status !== 'init' && status !== 'ready'"
-          :disabled="!validated || status === 'busy' || status === 'ready'"
-          @click="pullList"
-          type="link"
-          image="add-rounded"
-          text="Get list"
-        />
-        <Icon v-if="status === 'busy'" image="loading" class="rotating" />
-        <Icon
-          v-if="status !== 'create' && status !== 'unvalidated'"
-          @click="removeList($event)"
-          type="link"
-          image="cancel"
-          text="Remove list"
-        />
-        <Icon
-          v-if="status === 'create' || status === 'unvalidated'"
-          @click="cancelList"
-          type="link"
-          image="cancel"
-          text="Cancel"
-        />
-      </div>
+      <IconList
+        :iconGroup="iconSchema"
+        :status="status"
+        :validated="validated"
+        @targetFunction="targetFunction"
+      />
       <div
         v-if="status === 'create' || status === 'unvalidated'"
         class="form__create-list padded--small"
       >
-        <Forms :form="formSchema" @validate="validate" />
+        <Forms
+          :form="formSchema"
+          :updatedFormValues="updatedValues"
+          :status="status"
+          @validate="validate"
+          @input="formInput"
+          @click="formClick"
+        />
       </div>
       <div
         v-if="status === 'unvalidated' || status === 'error'"
-        class="message padded--small"
+        :class="`message ${
+          status === 'unvalidated' || status === 'error' ? 'message--error' : ''
+        } padded--small`"
       >
-        {{ message }}.
+        {{ message }}
         <span v-if="status === 'error'"
           >Click <a class="link" @click="pullList">here</a> to try again</span
         >
@@ -63,25 +46,27 @@
 </template>
 <script lang="ts">
 import { defineComponent, ref, nextTick, onMounted } from 'vue'
-import { listStore as list } from '@/store/lists'
+import { listStore } from '@/store/lists'
+import { userStore } from '@/store/user'
 import {
   List,
   ListContent,
   CrawlData,
-  FormEvaluationEvent
+  FormEvaluationEvent,
+  FormEvent
 } from '@/types/types'
-import { formMapping } from '@/maps/mapping'
+import { mapping } from '@/maps/mapping'
 import Forms from '@/components/factory/forms.vue'
-import Icon from '@/components/ui/icon.vue'
+import IconList from '@/components/layout/iconList.vue'
 
-const maxHeight = 500
+const maxHeight = 600
 
 export default defineComponent({
   name: 'ddashList',
-  emits: ['removeList'],
+  emits: ['removeList', 'signIn'],
   components: {
     Forms,
-    Icon
+    IconList
   },
   props: {
     id: {
@@ -94,55 +79,26 @@ export default defineComponent({
     const validated = ref<boolean>(false)
     const ddashList = ref<Array<ListContent>>([])
     const message = ref<string>('')
-    const formSchema = ref(formMapping('CreateList'))
+    const updatedValues = ref()
+
+    const iconSchema = ref(mapping('icons', 'ListIcons'))
+    const formSchema = ref(mapping('forms', 'CreateList'))
 
     let crawlData = {} as CrawlData
 
     const listRef = ref()
     const animateRef = ref()
 
-    const pullList = async () => {
-      if (!validated.value) {
-        message.value = 'Please enter selectors'
-        status.value = 'unvalidated'
-        setHeight()
-        return
-      }
-      status.value = 'busy'
-      setHeight()
-      try {
-        const result: List = await list.do.getListFromUrl(crawlData)
-        if (result) {
-          ddashList.value = result.listContent
-          status.value = 'ready'
-          setHeight()
-        } else {
-          message.value = 'Something went wrong'
-          status.value = 'error'
-          setHeight()
-        }
-      } catch (error) {
-        message.value = error.response ? error.response.data.message : error
-        status.value = 'error'
-        setHeight()
-      }
-    }
-
-    const validate = (data: FormEvaluationEvent) => {
-      validated.value = data.validationStatus
-      crawlData = {
-        name: data.formValues.listName,
-        url: data.formValues.listUrl,
-        searchParams: {
-          listSelector: data.formValues.listSelector,
-          itemSelector: data.formValues.itemSelector,
-          titleSelector: data.formValues.titleSelector,
-          linkSelector: data.formValues.linkSelector,
-          cookieWallAcceptSelector: data.formValues.cookieWallAcceptSelector
-            ? data.formValues.cookieWallAcceptSelector
-            : ''
-        }
-      }
+    const targetFunction = (data: string) => {
+      data === 'createList'
+        ? createList()
+        : data === 'cancelList'
+        ? cancelList()
+        : data === 'removeList'
+        ? removeList()
+        : data === 'getList'
+        ? getList()
+        : false
     }
 
     const createList = async () => {
@@ -159,7 +115,56 @@ export default defineComponent({
     }
 
     const removeList = () => {
-      emit('removeList', props.id)
+      setHeight(0)
+      setTimeout(() => {
+        emit('removeList', props.id)
+      }, 150)
+    }
+
+    const getList = async () => {
+      if (!validated.value) {
+        message.value = 'Please enter selectors'
+        status.value = 'unvalidated'
+        setHeight()
+        return
+      }
+      status.value = 'busy'
+      setHeight()
+      try {
+        const result: List = await listStore.do.getListFromUrl(crawlData)
+        ddashList.value = result.listContent
+        status.value = 'ready'
+        setHeight()
+      } catch (error) {
+        message.value = error.response ? error.response.data.message : error
+        status.value = 'error'
+        setHeight()
+      }
+    }
+
+    const validate = (data: FormEvaluationEvent) => {
+      data.validationStatus
+        ? ((validated.value = data.validationStatus),
+          (crawlData = {
+            name: data.formValues.listName,
+            url: data.formValues.listUrl,
+            searchParams: {
+              ...data.formValues
+            }
+          }),
+          (status.value = 'unvalidated'))
+        : false
+    }
+
+    const formInput = (formInput: FormEvent) => {
+      status.value = 'create'
+      setHeight()
+    }
+
+    const formClick = (data: string) => {
+      if (data === 'saveList' && !userStore.get.isLoggedIn) {
+        emit('signIn', true)
+      }
     }
 
     const setHeight = async (data: number | void) => {
@@ -182,12 +187,17 @@ export default defineComponent({
       cancelList,
       createList,
       ddashList,
+      formClick,
+      formInput,
       formSchema,
+      getList,
+      iconSchema,
       listRef,
       message,
-      pullList,
       removeList,
       status,
+      targetFunction,
+      updatedValues,
       validate,
       validated
     }

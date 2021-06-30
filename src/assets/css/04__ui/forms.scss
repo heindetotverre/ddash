@@ -1,4 +1,19 @@
+.form {
+  &__group {
+    margin-bottom: $spacing--xxxs;
+    margin-top: $spacing--xxs;
+  }
+
+  &__label {
+    display: block;
+    margin-bottom: $spacing--xxxs;
+  }
+}
+
 .message {
-  margin-bottom: 10px;
   font-size: 1.2rem;
+
+  &--error {
+    color: $c4;
+  }
 }

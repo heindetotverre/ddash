@@ -1,0 +1,39 @@
+[
+  {
+  "name": "ListIcons",
+  "iconList": [
+    {
+      "iconName": "getListIcon",
+      "iconType": "link",
+      "image": "add-rounded",
+      "text": "Get list",
+      "function": "getList"
+    },
+    {
+      "iconName": "createListIcon",
+      "iconType": "link",
+      "image": "add-rounded",
+      "text": "Create list",
+      "function": "createList"
+    },
+    {
+      "iconName": "loadingListIcon",
+      "image": "loading",
+      "class": "rotating"
+    },
+    {
+      "iconName": "removeListIcon",
+      "iconType": "link",
+      "image": "cancel",
+      "text": "Remove list",
+      "function": "removeList"
+    },
+    {
+      "iconName": "cancelListIcon",
+      "iconType": "link",
+      "image": "cancel",
+      "text": "Cancel",
+      "function": "cancelList"
+    }
+  ]}
+]

@@ -1,0 +1,13 @@
+.modal {
+  background-color: $c1;
+  border-radius: $spacing--xxs;
+  min-width: 400px;
+  padding: $spacing--s;
+  width: 50%;
+  z-index: 1001;
+
+  &--background {
+    background-color: rgba($c5, 0.3);
+    z-index: 1000;
+  }
+}

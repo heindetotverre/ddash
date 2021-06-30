@@ -20,7 +20,14 @@ const getListFromUrl = async (payload: CrawlData): Promise<List> => {
     listId: `list_${payload.name}_${state.lists.length}`
   }
   state.lists.push(constructedResult)
+  if (payload.searchParams.cookieWallAcceptSelector) {
+    saveList(payload)
+  }
   return constructedResult
+}
+
+const saveList = async (payload: CrawlData) => {
+  console.log('store: saveList with payload:', payload)
 }
 
 const getList = computed((): Array<List> => {

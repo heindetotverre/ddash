@@ -2,10 +2,10 @@
   &__list {
     align-self: baseline;
     background-color: $c1;
-    border-radius: 5px;
+    border-radius: $border-radius--base;
     margin-top: 2px;
-    transition: background-color 0.3s ease;
-    width: 300px;
+    transition: background-color $transition-speed--l ease;
+    width: $list-width--base;
 
     &:hover {
       background-color: lighten($c1, 4);
@@ -19,10 +19,10 @@
   &__item {
     border-top: 1px solid $c2;
     max-height: 150px;
-    padding: 10px;
+    padding: $spacing--xxs;
 
     & + & {
-      margin-top: 20px;
+      margin-top: $spacing--xs;
     }
   }
 }

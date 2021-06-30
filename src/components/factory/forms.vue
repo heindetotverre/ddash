@@ -3,6 +3,7 @@
     <div
       v-for="(field, index) in form.fields"
       :key="field.name"
+      @click="onClick(field.name)"
       class="form__group"
     >
       <component
@@ -11,8 +12,20 @@
         :label="field.label"
         :id="makeId(field.name, index)"
         :name="field.name"
-        @input="onInput({ field: field.name, value: $event })"
-        @blur="onBlur({ field: field.name })"
+        :required="field.required"
+        :validation="
+          validate({
+            field: field.name,
+            value: formValues[field.name]
+          })
+        "
+        :disabled="field.disabled"
+        :renderValidation="renderValidationResult"
+        v-model="formValues[field.name]"
+        @update:modelValue="
+          onInput({ field: field.name, value: formValues[field.name] })
+        "
+        @blur="onBlur({ field: field.name, value: formValues[field.name] })"
         @focus="onFocus({ field: field.name, value: formValues[field.name] })"
       >
       </component>
@@ -24,19 +37,38 @@
       :classes="button.classes"
       >{{ button.text }}</component
     >
+    <IconList
+      :iconGroup="{
+        iconList: form.icons,
+        name: form.name
+      }"
+      @targetFunction="targetFunction"
+      v-if="form.icons"
+    />
   </form>
 </template>
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
 import Button from '@/components/ui/button.vue'
+import IconList from '@/components/layout/iconList.vue'
+import { validators } from '@/validators/validators'
 import { componentMapping } from '@/maps/components'
-import { FormEvent } from '@/types/types'
+import { FormEvent, FormField, ValidationResult } from '@/types/types'
 
 export default defineComponent({
-  name: 'Forms',
-  emits: ['input', 'blur', 'focus', 'submit', 'validate'],
+  name: 'Form',
+  emits: [
+    'input',
+    'blur',
+    'focus',
+    'click',
+    'submit',
+    'validate',
+    'targetFunction'
+  ],
   components: {
-    Button
+    Button,
+    IconList
   },
   props: {
     form: {
@@ -55,18 +87,24 @@ export default defineComponent({
         requird: true
       }
     },
-    updatedForm: {
-      type: Object,
-      default() {
-        return {}
-      }
+    updatedFormValues: {
+      type: Object
+    },
+    status: {
+      type: String
     }
   },
   setup(props, { emit }) {
-    const formValues = ref<Record<string, unknown>>({})
+    let formValues = ref<Record<string, unknown>>({})
+    const validationErrors = [] as Array<ValidationResult>
+    const renderValidationResult = ref(false)
 
     const excecuteForm = () => {
       emit('submit', formValues.value)
+    }
+
+    const targetFunction = (formFunction: string) => {
+      emit('targetFunction', formFunction)
     }
 
     const mapComponents = (component: string) => {
@@ -78,31 +116,67 @@ export default defineComponent({
     }
 
     const onInput = (data: FormEvent) => {
+      emit('input', { field: data.field, value: data.value })
       formValues.value[data.field] = data.value
     }
 
-    const onBlur = () => {
-      console.log('blur')
+    const onBlur = (data: FormEvent) => {
+      validate(data)
     }
 
     const onFocus = (data: FormEvent) => {
       console.log('focus', data)
     }
 
-    watch(formValues.value, (updatedValue) => {
-      if (
-        updatedValue.itemSelector &&
-        updatedValue.linkSelector &&
-        updatedValue.listSelector &&
-        updatedValue.titleSelector &&
-        updatedValue.listUrl &&
-        updatedValue.listName
-      ) {
-        emit('validate', {
-          validationStatus: true,
-          formValues: formValues.value
-        })
+    const onClick = (data: string) => {
+      emit('click', data)
+    }
+
+    const validate = (inputData: FormEvent) => {
+      const field = props.form.fields.find(
+        (f: FormField) => f.name === inputData.field
+      )
+
+      props.form.fields.forEach((f: FormField, index: number) => {
+        const value = formValues.value[f.name]
+          ? (formValues.value[f.name] as string)
+          : ('' as string)
+
+        const error = f.required ? !validators(f.validator, value) : false
+
+        validationErrors[index] = {
+          fieldName: f.name,
+          error: error
+        }
+      })
+
+      const formError = validationErrors.find((e) => e.error)
+      !formError
+        ? emit('validate', {
+            validationStatus: true,
+            formValues: formValues.value
+          })
+        : emit('validate', {
+            validationStatus: false
+          })
+
+      return validators(field.validator, inputData.value) || !field.required
+        ? 'approved'
+        : 'error'
+    }
+
+    watch(props, () => {
+      if (props.updatedFormValues) {
+        const form = {
+          ...formValues.value,
+          ...props.updatedFormValues
+        } as Record<string, unknown>
+        formValues.value = form
       }
+
+      props.status === 'unvalidated'
+        ? (renderValidationResult.value = true)
+        : (renderValidationResult.value = false)
     })
 
     return {
@@ -110,9 +184,13 @@ export default defineComponent({
       formValues,
       makeId,
       mapComponents,
+      onClick,
       onInput,
       onBlur,
-      onFocus
+      onFocus,
+      renderValidationResult,
+      targetFunction,
+      validate
     }
   }
 })

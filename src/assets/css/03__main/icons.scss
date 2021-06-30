@@ -1,10 +1,10 @@
 .icon {
   display: flex;
-  transition: all ease 0.2s;
+  transition: all ease $transition-speed--s;
 
   &--svg {
-    height: 15px;
-    width: 15px;
+    height: $icon--base;
+    width: $icon--base;
   }
 
   &--text .icon--svg {
@@ -19,7 +19,7 @@
   &--link {
     > div:not(.icon--svg) {
       border-bottom: 1px solid transparent;
-      transition: border-bottom 0.25s ease;
+      transition: border-bottom $transition-speed--m ease;
     }
   }
 

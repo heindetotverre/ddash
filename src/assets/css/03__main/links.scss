@@ -1,7 +1,7 @@
 .link {
   border-bottom: 1px solid transparent;
   cursor: pointer;
-  transition: border-bottom 0.25s ease;
+  transition: border-bottom $transition-speed--m ease;
 
   &:hover {
     border-color: black;

@@ -1,9 +1,3 @@
-interface List {
-  listName: string,
-  listContent: Array<ListContent>,
-  listId: string
-}
-
 interface CrawlData {
   name: string,
   url: string,
@@ -14,6 +8,12 @@ interface CrawlData {
     linkSelector: string,
     cookieWallAcceptSelector: string
   }
+}
+
+interface List {
+  listName: string,
+  listContent: Array<ListContent>,
+  listId: string
 }
 
 interface ListContent {
@@ -36,12 +36,15 @@ interface FormField {
   label: string,
   component: string,
   type: string,
-  description: string
+  description: string,
+  required: boolean,
+  validator: string,
+  disabled: boolean
 }
 
 interface FormButton {
   name: string,
-  classes: string,
+  classes?: string,
   text: string,
   component: string
 }
@@ -59,10 +62,36 @@ interface FormEvaluationEvent {
   }
 }
 
-interface Form {
+interface FormObject {
   name: string,
   fields: Array<FormField>,
-  buttons: Array<FormButton>
+  buttons?: Array<FormButton>,
+  icons?: Array<IconsContent>
+}
+
+interface FormFieldUpdate {
+  fieldName: string,
+  fieldKey: string,
+  fieldValue: string
+}
+
+interface ValidationResult {
+  fieldName: string,
+  error: boolean
+}
+
+interface IconsContent {
+  iconName: string,
+  class?: string,
+  function?: string,
+  iconType?: string,
+  image: string,
+  text?: string
+}
+
+interface IconGroup {
+  name: string,
+  iconList: Array<IconsContent>
 }
 
 export {
@@ -70,7 +99,12 @@ export {
   CrawlData,
   ListContent,
   ListComponent,
-  Form,
+  FormObject,
   FormEvent,
-  FormEvaluationEvent
+  FormEvaluationEvent,
+  FormField,
+  FormFieldUpdate,
+  ValidationResult,
+  IconsContent,
+  IconGroup
 }

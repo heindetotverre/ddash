@@ -1,4 +1,7 @@
 .ddash {
+  display: flex;
+  flex-wrap: wrap;
+
   &__core {
     display: flex;
     flex-direction: column;
