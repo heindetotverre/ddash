@@ -64,6 +64,10 @@ export default defineComponent({
         ? (refreshedIcons = props.iconGroup.iconList.filter(
             (i: IconsContent) => i.iconName === 'getLoadingIcon'
           ))
+        : props.status === 'error'
+        ? (refreshedIcons = props.iconGroup.iconList.filter(
+            (i: IconsContent) => i.iconName === 'removeListIcon'
+          ))
         : false
 
       iconList.value = refreshedIcons

@@ -11,6 +11,9 @@ const state = reactive({
 
 const signIn = (payload: unknown) => {
   console.log('signIn', payload)
+  return {
+    status: 'failed'
+  }
 }
 
 const signUp = (payload: unknown) => {

@@ -1,6 +1,6 @@
 <template>
   <div class="animate" ref="animateRef">
-    <div class="ddash__list" ref="listRef" :id="id">
+    <div class="ddash__list" ref="contentRef" :id="id">
       <IconList
         :iconGroup="iconSchema"
         :status="status"
@@ -60,6 +60,7 @@ import Forms from '@/components/factory/forms.vue'
 import IconList from '@/components/layout/iconList.vue'
 
 const maxHeight = 600
+const initialListHeight = 37
 
 export default defineComponent({
   name: 'ddashList',
@@ -86,7 +87,7 @@ export default defineComponent({
 
     let crawlData = {} as CrawlData
 
-    const listRef = ref()
+    const contentRef = ref()
     const animateRef = ref()
 
     const targetFunction = (data: string) => {
@@ -108,7 +109,8 @@ export default defineComponent({
     }
 
     const cancelList = () => {
-      setHeight(37)
+      console.log(contentRef.value.clientHeight)
+      setHeight(initialListHeight)
       setTimeout(() => {
         status.value = 'init'
       }, 150)
@@ -143,6 +145,7 @@ export default defineComponent({
     }
 
     const validate = (data: FormEvaluationEvent) => {
+      console.log(data)
       data.validationStatus
         ? ((validated.value = data.validationStatus),
           (crawlData = {
@@ -152,8 +155,8 @@ export default defineComponent({
               ...data.formValues
             }
           }),
-          (status.value = 'unvalidated'))
-        : false
+          (status.value = 'create'))
+        : (validated.value = data.validationStatus)
     }
 
     const formInput = (formInput: FormEvent) => {
@@ -172,9 +175,10 @@ export default defineComponent({
       if (typeof data === 'number') {
         animateRef.value.style.height = data + 'px'
       } else {
-        listRef.value.clientHeight > maxHeight
+        contentRef.value.clientHeight > maxHeight
           ? (animateRef.value.style.height = maxHeight + 'px')
-          : (animateRef.value.style.height = listRef.value.clientHeight + 'px')
+          : (animateRef.value.style.height =
+              contentRef.value.clientHeight + 'px')
       }
     }
 
@@ -185,6 +189,7 @@ export default defineComponent({
     return {
       animateRef,
       cancelList,
+      contentRef,
       createList,
       ddashList,
       formClick,
@@ -192,7 +197,6 @@ export default defineComponent({
       formSchema,
       getList,
       iconSchema,
-      listRef,
       message,
       removeList,
       status,

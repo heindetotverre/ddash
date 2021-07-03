@@ -94,6 +94,10 @@ interface IconGroup {
   iconList: Array<IconsContent>
 }
 
+interface LoginResult {
+  status: string
+}
+
 export {
   List,
   CrawlData,
@@ -106,5 +110,6 @@ export {
   FormFieldUpdate,
   ValidationResult,
   IconsContent,
-  IconGroup
+  IconGroup,
+  LoginResult
 }

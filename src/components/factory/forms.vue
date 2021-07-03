@@ -10,7 +10,7 @@
         :is="mapComponents(field.component)"
         :type="field.type"
         :label="field.label"
-        :id="makeId(field.name, index)"
+        :id="`formItem_${index}_${field.name}`"
         :name="field.name"
         :required="field.required"
         :validation="
@@ -111,10 +111,6 @@ export default defineComponent({
       return componentMapping(component)
     }
 
-    const makeId = (name: string, index: string) => {
-      return `formItem_${index}_${name}`
-    }
-
     const onInput = (data: FormEvent) => {
       emit('input', { field: data.field, value: data.value })
       formValues.value[data.field] = data.value
@@ -125,7 +121,7 @@ export default defineComponent({
     }
 
     const onFocus = (data: FormEvent) => {
-      console.log('focus', data)
+      emit('focus', { field: data.field, value: data.value })
     }
 
     const onClick = (data: string) => {
@@ -174,6 +170,10 @@ export default defineComponent({
         formValues.value = form
       }
 
+      if (props.updatedFormValues) {
+        props.updatedFormValues.clear ? (formValues.value = {}) : false
+      }
+
       props.status === 'unvalidated'
         ? (renderValidationResult.value = true)
         : (renderValidationResult.value = false)
@@ -182,7 +182,6 @@ export default defineComponent({
     return {
       excecuteForm,
       formValues,
-      makeId,
       mapComponents,
       onClick,
       onInput,

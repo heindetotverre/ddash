@@ -90,7 +90,7 @@
     "fields": [
       {
         "name": "userName",
-        "label": "Enter your username",
+        "label": "Enter your username or email",
         "component": "Input",
         "type": "text",
         "description": "Enter your registrated user name or email",
