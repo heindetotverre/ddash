@@ -109,7 +109,6 @@ export default defineComponent({
     }
 
     const cancelList = () => {
-      console.log(contentRef.value.clientHeight)
       setHeight(initialListHeight)
       setTimeout(() => {
         status.value = 'init'
@@ -145,7 +144,6 @@ export default defineComponent({
     }
 
     const validate = (data: FormEvaluationEvent) => {
-      console.log(data)
       data.validationStatus
         ? ((validated.value = data.validationStatus),
           (crawlData = {
