@@ -94,8 +94,26 @@ interface IconGroup {
   iconList: Array<IconsContent>
 }
 
-interface LoginResult {
+interface AuthResult {
   status: string
+}
+
+interface AuthPayload {
+  method: string,
+  values: unknown | AuthLogin | AuthCreateUser
+}
+
+interface AuthLogin {
+  username: string,
+  password: string
+}
+
+interface AuthCreateUser {
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+  passwordCheck: string
 }
 
 export {
@@ -111,5 +129,8 @@ export {
   ValidationResult,
   IconsContent,
   IconGroup,
-  LoginResult
+  AuthResult,
+  AuthPayload,
+  AuthLogin,
+  AuthCreateUser
 }

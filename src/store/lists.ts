@@ -12,7 +12,7 @@ const state = reactive({
 
 const getListFromUrl = async (payload: CrawlData): Promise<List> => {
   const url = new URL(window.location.href)
-  const endPoint = `http://${url.hostname}:${process.env.VUE_APP_SERVERPORT}/`
+  const endPoint = `http://${url.hostname}:${process.env.VUE_APP_SERVERPORT}/crawl`
   const result: AxiosResponse = await axios.post(endPoint, payload)
   const constructedResult: List = {
     listName: payload.name,

@@ -8,7 +8,7 @@ const port = process.env.VUE_APP_SERVERPORT || 8000
 app.use(cors())
 app.use(express.json())
 
-app.post('/', async (req, res) => {
+app.post('/crawl', async (req, res) => {
   try {
     res.header("Access-Control-Allow-Origin", "*")
     const crawlRequestInfo = req.body
@@ -19,6 +19,24 @@ app.post('/', async (req, res) => {
     await browser.close()
   } catch (error) {
     res.status(500).json({ message: `Crawling error occurred: ${error}` })
+  }
+})
+
+app.post('/auth/creatUser', async (req, res) => {
+  try {
+    const createUserInfo = req.body
+    console.log(createUserInfo)
+  } catch (error) {
+    res.status(500).json({ message: `Auth error occurred: ${error}` })
+  }
+})
+
+app.post('/auth/login', async (req, res) => {
+  try {
+    const loginInfo = req.body
+    console.log(loginInfo)
+  } catch (error) {
+    res.status(500).json({ message: `Auth error occurred: ${error}` })
   }
 })
 
