@@ -5,8 +5,18 @@
         {{ message }}
       </div>
       <Forms
+        v-if="authMethod === 'signIn'"
         :status="status"
-        :form="formSchema"
+        :form="formSchemaSignIn"
+        :updatedFormValues="updatedValues"
+        @targetFunction="targetFunctionEvaluation"
+        @input="formInput"
+        @validate="validate"
+      />
+      <Forms
+        v-if="authMethod === 'signUp'"
+        :status="status"
+        :form="formSchemaSignUp"
         :updatedFormValues="updatedValues"
         @targetFunction="targetFunctionEvaluation"
         @input="formInput"
@@ -24,7 +34,13 @@ import { defineComponent, ref, nextTick, onMounted } from 'vue'
 import { userStore } from '@/store/user'
 import Forms from '@/components/factory/forms.vue'
 import { mapping } from '@/maps/mapping'
-import { FormEvent, FormEvaluationEvent, AuthResult, AuthLogin, AuthCreateUser } from '@/types/types'
+import {
+  FormEvent,
+  FormEvaluationEvent,
+  AuthResult,
+  AuthLogin,
+  AuthCreateUser
+} from '@/types/types'
 
 const maxHeight = 600
 
@@ -40,51 +56,39 @@ export default defineComponent({
     const validationMessage = ref('Please enter your credentials')
     const formValues = ref<Record<string, unknown>>({})
     const updatedValues = ref()
+    const authMethod = ref('signIn')
 
-    let authMethod = 'signIn'
-    let formSchema = ref(mapping('forms', 'SignIn'))
+    const formSchemaSignIn = ref(mapping('forms', 'SignIn'))
+    const formSchemaSignUp = ref(mapping('forms', 'SignUp'))
 
     const contentRef = ref()
     const animateRef = ref()
 
     const targetFunctionEvaluation = (targetFunction: string) => {
-      if (targetFunction === 'cancel') {
+      if (targetFunction === 'cancelSignIn') {
         close()
       }
-
-      authMethod === targetFunction
+      authMethod.value === targetFunction
         ? auth()
-        : switchAuth(targetFunction)
-
+        : ((authMethod.value = targetFunction), (status.value = 'init'))
       setHeight()
     }
 
     const auth = async () => {
-      console.log('auth', 'status: ' + status.value)
       if (status.value === 'validated') {
-        const authInfo = formValues.value as unknown | AuthLogin | AuthCreateUser
+        const authInfo = formValues.value as
+          | unknown
+          | AuthLogin
+          | AuthCreateUser
 
         const result = (await userStore.do.auth({
-          method: authMethod,
+          method: authMethod.value,
           values: authInfo
         })) as AuthResult
         result.status === 'succes' ? close() : (status.value = 'loginFailed')
       } else {
         status.value = 'unvalidated'
       }
-    }
-
-    const switchAuth = (targetFunction: string) => {
-      console.log('switch', 'status: ' + status.value)
-      if (targetFunction === 'signIn') {
-        formSchema.value = mapping('forms', 'SignIn')
-      }
-
-      if (targetFunction === 'signUp') {
-        formSchema.value = mapping('forms', 'SignUp')
-      }
-
-      authMethod = targetFunction
     }
 
     const close = () => {
@@ -96,6 +100,7 @@ export default defineComponent({
 
     const formInput = (formInput: FormEvent) => {
       formValues.value[formInput.field] = formInput.value
+      status.value = 'init'
       setHeight()
     }
 
@@ -120,10 +125,12 @@ export default defineComponent({
     })
 
     return {
+      authMethod,
       animateRef,
       contentRef,
       formInput,
-      formSchema,
+      formSchemaSignIn,
+      formSchemaSignUp,
       message,
       targetFunctionEvaluation,
       updatedValues,
