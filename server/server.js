@@ -1,9 +1,14 @@
 /* eslint-disable */
+require('dotenv').config()
+
 const express = require('express')
 const cors = require('cors')
 const puppeteer = require('puppeteer')
 const app = express()
-const port = process.env.VUE_APP_SERVERPORT || 8000
+const port = process.env.VUE_APP_SERVERPORT
+const fs = require('fs')
+const connect = require('./connect.js')
+const { randomUUID } = require('crypto')
 
 app.use(cors())
 app.use(express.json())
@@ -18,26 +23,81 @@ app.post('/crawl', async (req, res) => {
     res.send(listResult)
     await browser.close()
   } catch (error) {
-    res.status(500).json({ message: `Crawling error occurred: ${error}` })
+    res.status(500).json({ status: 'failed', message: `Crawling error occurred: ${error}` })
   }
 })
 
 app.post('/auth/creatUser', async (req, res) => {
   try {
+    const client = await connect(res)
+    const db = client.db(process.env.DB_NAME)
+    const collection = db.collection(process.env.DB_COLLECTION)
     const createUserInfo = req.body
-    console.log(createUserInfo)
+
+    const existingUser = await collection.findOne({ email: createUserInfo.email })
+    if (existingUser) {
+      res.status(200).json({
+        status: 'failed', message: 'User already exists, please use other email', reason: 'userExists'
+      })
+    } else {
+      const newUser = await collection.insertOne({
+        ...createUserInfo,
+        Created: new Date().getTime(),
+        userId: uuidCreation()
+      })
+      res.status(200).json({
+        status: 'success', message: 'User succesfully created'
+      })
+      return newUser
+    }
   } catch (error) {
-    res.status(500).json({ message: `Auth error occurred: ${error}` })
+    res.status(500).json({
+      status: 'failed', message: `/Auth/createUser error occurred: ${error}`
+    })
   }
 })
 
 app.post('/auth/login', async (req, res) => {
   try {
+    const client = await connect(res)
+    const db = client.db(process.env.DB_NAME)
+    const collection = db.collection(process.env.DB_COLLECTION)
     const loginInfo = req.body
-    console.log(loginInfo)
+
+    const existingUser = await collection.findOne({ email: loginInfo.userName })
+    if (existingUser) {
+      const password = await collection.findOne({ password: loginInfo.password })
+      if (password) {
+        res.status(200).json({
+          status: 'success', message: 'Login has succeeded'
+        })
+      } else {
+        res.status(200).json({
+          status: 'failed', message: 'Login failed', reason: 'securityForbidsReason'
+        })
+      }
+    } else {
+      res.status(200).json({
+        status: 'failed', message: 'Login failed', reason: 'securityForbidsReason'
+      })
+    }
   } catch (error) {
-    res.status(500).json({ message: `Auth error occurred: ${error}` })
+    res.status(500).json({
+      status: 'failed', message: `Auth error occurred: ${error}`
+    })
   }
+})
+
+app.post('/list/save', async (req, res) => {
+
+})
+
+app.post('/list/get', async (req, res) => {
+
+})
+
+app.post('/auth/getSession', async (req, res) => {
+
 })
 
 app.listen(port)
@@ -67,4 +127,11 @@ const getList = async (page, crawlRequestInfo) => {
       : `No data collected on ${crawlRequestInfo.url} with selectors '.${crawlRequestInfo.searchParams.listSelector}', '.${crawlRequestInfo.searchParams.itemSelector}', '.${crawlRequestInfo.searchParams.titleSelector}', '.${crawlRequestInfo.searchParams.linkSelector}'`
   }, { crawlRequestInfo })
   return result
+}
+
+const uuidCreation = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }

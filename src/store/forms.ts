@@ -54,7 +54,9 @@ const getForm = computed((formName: string): FormObject => {
 export const formStore = readonly({
   state: state,
   get: {
-    getForm,
+    getForm
+  },
+  do: {
     updateFields
   }
 })

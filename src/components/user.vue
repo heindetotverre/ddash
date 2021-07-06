@@ -37,10 +37,10 @@ import { mapping } from '@/maps/mapping'
 import {
   FormEvent,
   FormEvaluationEvent,
-  AuthResult,
   AuthLogin,
   AuthCreateUser
 } from '@/types/types'
+import { AxiosResponse } from 'axios'
 
 const maxHeight = 600
 
@@ -84,8 +84,21 @@ export default defineComponent({
         const result = (await userStore.do.auth({
           method: authMethod.value,
           values: authInfo
-        })) as AuthResult
-        result.status === 'succes' ? close() : (status.value = 'loginFailed')
+        })) as AxiosResponse
+        if (result.data.status === 'success') {
+          close()
+        }
+        if (result.data.status === 'failed') {
+          updatedValues.value = {
+            ...formValues,
+            email: '',
+            password: '',
+            passwordCheck: ''
+          }
+          validationMessage.value = result.data.message
+          status.value = 'unvalidated'
+          setHeight()
+        }
       } else {
         status.value = 'unvalidated'
       }
