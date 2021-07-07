@@ -72,7 +72,7 @@ interface FormObject {
 interface FormFieldUpdate {
   fieldName: string,
   fieldKey: string,
-  fieldValue: string
+  fieldValue: string | boolean
 }
 
 interface ValidationResult {

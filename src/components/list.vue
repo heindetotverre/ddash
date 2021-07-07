@@ -45,15 +45,17 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, nextTick, onMounted } from 'vue'
+import { defineComponent, ref, nextTick, onMounted, watch } from 'vue'
 import { listStore } from '@/store/lists'
+import { formStore } from '@/store/forms'
 import { userStore } from '@/store/user'
 import {
   List,
   ListContent,
   CrawlData,
   FormEvaluationEvent,
-  FormEvent
+  FormEvent,
+  FormObject
 } from '@/types/types'
 import { mapping } from '@/maps/mapping'
 import Forms from '@/components/factory/forms.vue'
@@ -73,6 +75,12 @@ export default defineComponent({
     id: {
       type: String,
       required: true
+    },
+    user: {
+      type: Object,
+      userId: {
+        type: String
+      }
     }
   },
   setup(props, { emit }) {
@@ -163,7 +171,7 @@ export default defineComponent({
     }
 
     const formClick = (data: string) => {
-      if (data === 'saveList' && !userStore.get.isLoggedIn) {
+      if (data === 'saveList' && props.user && !props.user.userId) {
         emit('signIn', true)
       }
     }
@@ -180,7 +188,28 @@ export default defineComponent({
       }
     }
 
+    const updateSaveList = async () => {
+      if (props.user && props.user.userId) {
+        const form = formSchema.value as FormObject
+        const updatedForm = formStore.do.updateFields(form, [
+          {
+            fieldName: 'saveList',
+            fieldKey: 'disabled',
+            fieldValue: false
+          }
+        ])
+        formSchema.value = updatedForm
+      } else {
+        formSchema.value = mapping('forms', 'CreateList')
+      }
+    }
+
+    watch(props, () => {
+      updateSaveList()
+    })
+
     onMounted(() => {
+      updateSaveList()
       setHeight()
     })
 

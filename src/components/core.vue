@@ -6,6 +6,7 @@
         :key="item.id"
         :is="item.component"
         :id="item.id"
+        :user="user"
         @removeList="removeList"
         @signIn="signIn"
       ></component>
@@ -23,11 +24,20 @@
     <Modal v-if="showLogin">
       <User @cancel="cancelLogin" />
     </Modal>
+    <div v-if="user.userId" class="ddash__user">
+      <Icon
+        @click="signOut"
+        iconType="link"
+        image="add-rounded"
+        text="Log out"
+      />
+      {{ user }}
+    </div>
   </section>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, ref, computed, watch } from 'vue'
 import { ListComponent } from '@/types/types'
 import { userStore } from '@/store/user'
 import list from '@/components/list.vue'
@@ -46,6 +56,7 @@ export default defineComponent({
   setup() {
     const ddashLists = ref<Array<ListComponent>>([])
     const showLogin = ref(false)
+    const userInfo = userStore.get.user as Record<string, unknown>
 
     const addList = () => {
       ddashLists.value.push({
@@ -66,12 +77,23 @@ export default defineComponent({
     }
 
     const signIn = (data: boolean) => {
-      !userStore.get.isLoggedIn ? (showLogin.value = data) : false
+      !userInfo.userId ? (showLogin.value = data) : false
+    }
+
+    const signOut = () => {
+      userStore.do.auth({
+        method: 'signOut',
+        values: {}
+      })
     }
 
     const cancelLogin = () => {
       showLogin.value = false
     }
+
+    const user = computed(() => {
+      return userStore.get.user
+    })
 
     return {
       addList,
@@ -80,7 +102,9 @@ export default defineComponent({
       ddashLists,
       removeList,
       showLogin,
-      signIn
+      signIn,
+      signOut,
+      user
     }
   }
 })

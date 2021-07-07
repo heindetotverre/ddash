@@ -30,7 +30,7 @@ const saveList = async (payload: CrawlData) => {
   console.log('store: saveList with payload:', payload)
 }
 
-const getList = computed((): Array<List> => {
+const getLists = computed((): Array<List> => {
   return state.lists
 })
 
@@ -41,7 +41,7 @@ const reset = () => {
 export const listStore = readonly({
   state: state,
   get: {
-    getList
+    getLists
   },
   do: {
     getListFromUrl,
