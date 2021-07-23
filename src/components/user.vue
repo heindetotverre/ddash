@@ -38,9 +38,9 @@ import {
   FormEvent,
   FormEvaluationEvent,
   AuthLogin,
-  AuthCreateUser
+  AuthCreateUser,
+  ApiResponse
 } from '@/types/types'
-import { AxiosResponse } from 'axios'
 
 const maxHeight = 600
 
@@ -84,18 +84,19 @@ export default defineComponent({
         const result = (await userStore.do.auth({
           method: authMethod.value,
           values: authInfo
-        })) as AxiosResponse
-        if (result.data.status === 'success') {
+        })) as ApiResponse
+        console.log(result)
+        if (result.status === 'success') {
           close()
         }
-        if (result.data.status === 'failed') {
+        if (result.status === 'failed') {
           updatedValues.value = {
             ...formValues,
             email: '',
             password: '',
             passwordCheck: ''
           }
-          validationMessage.value = result.data.message
+          validationMessage.value = result.message
           status.value = 'unvalidated'
           setHeight()
         }

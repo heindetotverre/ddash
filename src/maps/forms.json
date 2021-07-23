@@ -92,7 +92,7 @@
         "name": "userName",
         "label": "Enter your username or email",
         "component": "Input",
-        "type": "text",
+        "type": "email",
         "description": "Enter your registrated user name or email",
         "required": true,
         "validator": "notempty",

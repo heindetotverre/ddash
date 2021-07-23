@@ -1,11 +1,17 @@
 .ddash {
   display: flex;
-  flex-wrap: wrap;
 
   &__core {
     display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    width: 100%;
+    flex-direction: row;
+
+    > .animate {
+      width: 0px;
+    }
+
+    > .animate,
+    > .ddash__list {
+      margin-left: 2px;
+    }
   }
 }

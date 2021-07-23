@@ -1,16 +1,23 @@
 <template>
   <section class="ddash">
     <div class="ddash__core">
+      <div v-for="crawlData in listFromDB" :key="crawlData" class="ddash__list">
+        <List
+          :crawlData="crawlData"
+          :listId="crawlData.listId"
+          @removeList="removeList"
+        />
+      </div>
       <component
-        v-for="item in componentList"
+        v-for="item in newLists"
         :key="item.id"
         :is="item.component"
-        :id="item.id"
+        :listId="item.listId"
         :user="user"
         @removeList="removeList"
         @signIn="signIn"
       ></component>
-      <div class="ddash__list">
+      <div class="ddash__list ddash__list--add">
         <div class="group padded--small">
           <Icon
             @click="addList"
@@ -22,58 +29,66 @@
       </div>
     </div>
     <Modal v-if="showLogin">
-      <User @cancel="cancelLogin" />
+      <UserLogin @cancel="cancelLogin" />
     </Modal>
-    <div v-if="user.userId" class="ddash__user">
+    <div class="ddash__user user">
+      <div v-if="user.userId" class="user user--present">
+        <Icon
+          @click="signOut"
+          iconType="link"
+          image="sign-out"
+          text="Log out"
+        />
+        <div class="user__info">
+          <span>{{ user.firstName }} {{ user.lastName }}</span>
+        </div>
+      </div>
       <Icon
-        @click="signOut"
+        v-else
+        @click="signIn"
         iconType="link"
         image="add-rounded"
-        text="Log out"
+        text="Log in"
       />
-      {{ user }}
     </div>
   </section>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from 'vue'
-import { ListComponent } from '@/types/types'
+import { defineComponent, ref, computed, onMounted } from 'vue'
+import { ListComponent, User } from '@/types/types'
+import { listStore } from '@/store/lists'
 import { userStore } from '@/store/user'
-import list from '@/components/list.vue'
+import List from '@/components/list.vue'
 import Icon from '@/components/layout/icon.vue'
-import User from '@/components/user.vue'
+import UserLogin from '@/components/user.vue'
 import Modal from '@/components/layout/modal.vue'
 
 export default defineComponent({
   name: 'ddashCore',
   components: {
-    list,
     Icon,
-    User,
+    List,
+    UserLogin,
     Modal
   },
   setup() {
-    const ddashLists = ref<Array<ListComponent>>([])
+    const newLists = ref<Array<ListComponent>>([])
     const showLogin = ref(false)
-    const userInfo = userStore.get.user as Record<string, unknown>
+    const userInfo = userStore.get.user as User
 
     const addList = () => {
-      ddashLists.value.push({
-        component: 'list',
-        id: `list_${ddashLists.value.length}`
+      newLists.value.push({
+        component: 'List',
+        listId: `list_${newLists.value.length}`
       })
     }
 
-    const componentList = computed(() => {
-      return ddashLists.value
-    })
-
     const removeList = (id: string) => {
-      const filteredList = ddashLists.value.filter((list) => {
-        return list.id !== id
+      const filteredList = newLists.value.filter((list) => {
+        return list.listId !== id
       })
-      ddashLists.value = filteredList
+      newLists.value = filteredList
     }
 
     const signIn = (data: boolean) => {
@@ -95,11 +110,20 @@ export default defineComponent({
       return userStore.get.user
     })
 
+    const listFromDB = computed(() => {
+      return listStore.get.listsBeingPulled
+    })
+
+    onMounted(async () => {
+      const user = await userStore.do.authCheck()
+      user ? listStore.do.getAllLists(user.userId) : false
+    })
+
     return {
       addList,
       cancelLogin,
-      componentList,
-      ddashLists,
+      newLists,
+      listFromDB,
       removeList,
       showLogin,
       signIn,

@@ -50,7 +50,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
 import Button from '@/components/ui/button.vue'
-import IconList from '@/components/layout/iconList.vue'
+import IconList from '@/components/factory/icons.vue'
 import { validators } from '@/validators/validators'
 import { componentMapping } from '@/maps/components'
 import { FormEvent, FormField, ValidationResult } from '@/types/types'

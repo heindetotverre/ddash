@@ -1,0 +1,15 @@
+.user {
+  background-color: $c5;
+  bottom: 0;
+  color: $c3;
+  display: flex;
+  justify-content: space-between;
+  left: 0;
+  padding: $spacing--xs;
+  position: fixed;
+  width: 100%;
+
+  .icon--link:hover > div:not(.icon--svg) {
+    border-color: $c3;
+  }
+}

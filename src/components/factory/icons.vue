@@ -1,5 +1,5 @@
 <template>
-  <div :class="`group group--icons padded--small fixed`">
+  <div :class="`group group--icons padded--small fixed ${classes}`">
     <component
       v-for="(item, index) in iconList"
       :key="index"
@@ -38,6 +38,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     let iconList = ref([])
+    const classes = ref('')
 
     const onInput = async (data: string) => {
       emit('targetFunction', data)
@@ -57,17 +58,20 @@ export default defineComponent({
               i.iconName === 'getListIcon' || i.iconName === 'cancelListIcon'
           ))
         : props.status === 'ready'
-        ? (refreshedIcons = props.iconGroup.iconList.filter(
+        ? ((refreshedIcons = props.iconGroup.iconList.filter(
             (i: IconsContent) => i.iconName === 'removeListIcon'
-          ))
+          )),
+          (classes.value = 'group--right'))
         : props.status === 'busy'
-        ? (refreshedIcons = props.iconGroup.iconList.filter(
-            (i: IconsContent) => i.iconName === 'getLoadingIcon'
-          ))
+        ? ((refreshedIcons = props.iconGroup.iconList.filter(
+            (i: IconsContent) => i.iconName === 'loadingListIcon'
+          )),
+          (classes.value = 'group--center'))
         : props.status === 'error'
-        ? (refreshedIcons = props.iconGroup.iconList.filter(
+        ? ((refreshedIcons = props.iconGroup.iconList.filter(
             (i: IconsContent) => i.iconName === 'removeListIcon'
-          ))
+          )),
+          (classes.value = 'group--right'))
         : false
 
       iconList.value = refreshedIcons
@@ -86,6 +90,7 @@ export default defineComponent({
     })
 
     return {
+      classes,
       disabledState,
       iconList,
       onInput

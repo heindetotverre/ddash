@@ -3,16 +3,14 @@
     align-self: baseline;
     background-color: $c1;
     border-radius: $border-radius--base;
-    margin-top: 2px;
     transition: background-color $transition-speed--l ease;
-    width: $list-width--base;
 
     &:hover {
       background-color: lighten($c1, 4);
     }
 
-    &--pulled {
-      overflow-y: scroll;
+    &--add {
+      width: $list-width--base;
     }
   }
 

@@ -1,6 +1,6 @@
 <template>
   <div class="animate" ref="animateRef">
-    <div class="ddash__list" ref="contentRef" :id="id">
+    <div class="ddash__list" ref="contentRef" :listId="listId">
       <IconList
         :iconGroup="iconSchema"
         :status="status"
@@ -38,7 +38,7 @@
           class="ddash__item padded--small"
         >
           <h2>{{ item.title }}</h2>
-          <a :href="item.link">{{ item.link }}</a>
+          <a :href="item.link" target="_blank">{{ item.link }}</a>
         </div>
       </div>
     </div>
@@ -48,7 +48,6 @@
 import { defineComponent, ref, nextTick, onMounted, watch } from 'vue'
 import { listStore } from '@/store/lists'
 import { formStore } from '@/store/forms'
-import { userStore } from '@/store/user'
 import {
   List,
   ListContent,
@@ -59,9 +58,10 @@ import {
 } from '@/types/types'
 import { mapping } from '@/maps/mapping'
 import Forms from '@/components/factory/forms.vue'
-import IconList from '@/components/layout/iconList.vue'
+import IconList from '@/components/factory/icons.vue'
 
-const maxHeight = 600
+const width = 300
+const maxHeight = 800
 const initialListHeight = 37
 
 export default defineComponent({
@@ -72,7 +72,7 @@ export default defineComponent({
     IconList
   },
   props: {
-    id: {
+    listId: {
       type: String,
       required: true
     },
@@ -81,6 +81,9 @@ export default defineComponent({
       userId: {
         type: String
       }
+    },
+    crawlData: {
+      type: Object
     }
   },
   setup(props, { emit }) {
@@ -106,7 +109,7 @@ export default defineComponent({
         : data === 'removeList'
         ? removeList()
         : data === 'getList'
-        ? getList()
+        ? getList(true)
         : false
     }
 
@@ -114,6 +117,7 @@ export default defineComponent({
       validated.value = false
       status.value = 'create'
       setHeight()
+      setWidth(width)
     }
 
     const cancelList = () => {
@@ -125,29 +129,37 @@ export default defineComponent({
 
     const removeList = () => {
       setHeight(0)
+      setWidth(0)
       setTimeout(() => {
-        emit('removeList', props.id)
+        emit('removeList', props.listId)
       }, 150)
     }
 
-    const getList = async () => {
+    const getList = async (newList: boolean | void) => {
       if (!validated.value) {
         message.value = 'Please enter selectors'
         status.value = 'unvalidated'
         setHeight()
+        setWidth(width)
         return
       }
       status.value = 'busy'
       setHeight()
       try {
-        const result: List = await listStore.do.getListFromUrl(crawlData)
+        const result = (await listStore.do.getListFromUrl(
+          crawlData,
+          newList
+        )) as List
         ddashList.value = result.listContent
+        animateRef.value.style.overflowY = 'auto'
         status.value = 'ready'
         setHeight()
+        setWidth(width)
       } catch (error) {
         message.value = error.response ? error.response.data.message : error
         status.value = 'error'
         setHeight()
+        setWidth(width)
       }
     }
 
@@ -159,7 +171,9 @@ export default defineComponent({
             url: data.formValues.listUrl,
             searchParams: {
               ...data.formValues
-            }
+            },
+            userId: props.user ? props.user.userId : false,
+            listId: props.listId
           }),
           (status.value = 'create'))
         : (validated.value = data.validationStatus)
@@ -188,6 +202,15 @@ export default defineComponent({
       }
     }
 
+    const setWidth = async (data: number | void) => {
+      await nextTick()
+      if (typeof data === 'number') {
+        animateRef.value.style.width = data + 'px'
+      } else {
+        animateRef.value.style.width = contentRef.value.clientWidth + 'px'
+      }
+    }
+
     const updateSaveList = async () => {
       if (props.user && props.user.userId) {
         const form = formSchema.value as FormObject
@@ -199,18 +222,38 @@ export default defineComponent({
           }
         ])
         formSchema.value = updatedForm
+        updatedValues.value = {
+          ...formSchema.value,
+          saveList: true
+        }
       } else {
         formSchema.value = mapping('forms', 'CreateList')
+        updatedValues.value = {
+          ...formSchema.value,
+          saveList: false
+        }
       }
     }
 
     watch(props, () => {
       updateSaveList()
+
+      if (props.crawlData) {
+        crawlData = props.crawlData as CrawlData
+        getList()
+      }
     })
 
     onMounted(() => {
       updateSaveList()
       setHeight()
+      setWidth(width)
+
+      if (props.crawlData) {
+        crawlData = props.crawlData as CrawlData
+        validated.value = true
+        getList()
+      }
     })
 
     return {

@@ -6,8 +6,11 @@ interface CrawlData {
     itemSelector: string,
     titleSelector: string,
     linkSelector: string,
-    cookieWallAcceptSelector: string
-  }
+    cookieWallAcceptSelector: string,
+    saveList?: boolean
+  },
+  userId?: string,
+  listId: string
 }
 
 interface List {
@@ -22,7 +25,7 @@ interface ListContent {
 }
 
 interface ListComponent {
-  id: string,
+  listId: string,
   component: string
 }
 
@@ -116,6 +119,22 @@ interface AuthCreateUser {
   passwordCheck: string
 }
 
+interface User {
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+  passwordCheck: string,
+  created: number,
+  userId: string
+}
+
+interface ApiResponse {
+  message: string,
+  status: string,
+  reason?: string,
+}
+
 export {
   List,
   CrawlData,
@@ -132,5 +151,7 @@ export {
   AuthResult,
   AuthPayload,
   AuthLogin,
-  AuthCreateUser
+  AuthCreateUser,
+  User,
+  ApiResponse
 }
