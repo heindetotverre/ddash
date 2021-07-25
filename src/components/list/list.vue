@@ -4,7 +4,7 @@
       <IconList
         :iconGroup="iconSchema"
         :status="status"
-        :validated="validated"
+        :validated="isFormValidated"
         @targetFunction="targetFunction"
       />
       <div
@@ -15,7 +15,7 @@
           :form="formSchema"
           :updatedFormValues="updatedValues"
           :status="status"
-          @validate="validate"
+          @validate="validateFrom"
           @input="formInput"
           @click="formClick"
         />
@@ -27,9 +27,9 @@
         } padded--small`"
       >
         {{ message }}
-        <span v-if="status === 'error'"
-          >Click <a class="link" @click="pullList">here</a> to try again</span
-        >
+        <span v-if="status === 'error'">
+          <a class="link" @click="pullList">{{ strings.try_again }}</a>
+        </span>
       </div>
       <div class="ddash__content">
         <div
@@ -48,6 +48,7 @@
 import { defineComponent, ref, onMounted, watch } from 'vue'
 import { listStore } from '@/store/lists'
 import { formStore } from '@/store/forms'
+import { stringStore } from '@/store/strings'
 import {
   List,
   ListContent,
@@ -89,10 +90,11 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const status = ref<string>('init')
-    const validated = ref<boolean>(false)
+    const isFormValidated = ref<boolean>(false)
     const ddashList = ref<Array<ListContent>>([])
     const message = ref<string>('')
     const updatedValues = ref()
+    const strings = stringStore.get.getStrings
 
     const iconSchema = ref(mapping('icons', 'ListIcons'))
     const formSchema = ref(mapping('forms', 'CreateList'))
@@ -119,7 +121,6 @@ export default defineComponent({
     }
 
     const createList = async () => {
-      validated.value = false
       status.value = 'create'
       setDimensions({
         animateElement: animateRef.value,
@@ -153,8 +154,8 @@ export default defineComponent({
     }
 
     const getList = async () => {
-      if (!validated.value) {
-        message.value = 'Please enter selectors'
+      if (!isFormValidated.value) {
+        message.value = strings.unsuccesfull_validation_list as string
         status.value = 'unvalidated'
         setDimensions({
           animateElement: animateRef.value,
@@ -187,9 +188,9 @@ export default defineComponent({
       }
     }
 
-    const validate = (data: FormEvaluationEvent) => {
+    const validateFrom = (data: FormEvaluationEvent) => {
       data.validationStatus
-        ? ((validated.value = data.validationStatus),
+        ? ((isFormValidated.value = data.validationStatus),
           (crawlData = {
             name: data.formValues.listName,
             url: data.formValues.listUrl,
@@ -200,7 +201,7 @@ export default defineComponent({
             listId: props.listId
           }),
           (status.value = 'create'))
-        : (validated.value = data.validationStatus)
+        : (isFormValidated.value = data.validationStatus)
     }
 
     const formInput = () => {
@@ -271,7 +272,7 @@ export default defineComponent({
 
       if (props.crawlData) {
         crawlData = props.crawlData as CrawlData
-        validated.value = true
+        isFormValidated.value = true
         getList()
       }
     })
@@ -292,8 +293,8 @@ export default defineComponent({
       status,
       targetFunction,
       updatedValues,
-      validate,
-      validated
+      validateFrom,
+      isFormValidated
     }
   }
 })

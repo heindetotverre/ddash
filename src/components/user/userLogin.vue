@@ -31,6 +31,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue'
 import { userStore } from '@/store/user'
+import { stringStore } from '@/store/strings'
 import Forms from '@/components/factory/forms.vue'
 import { mapping } from '@/maps/mapping'
 import { setDimensionsUtil } from '@/utils/setDimensions'
@@ -51,8 +52,9 @@ export default defineComponent({
   emits: ['cancel'],
   setup(props, { emit }) {
     const status = ref<string>('init')
-    const message = ref('To save your list you have to login')
-    const validationMessage = ref('Please enter your credentials')
+    const strings = stringStore.get.getStrings
+    const message = ref(strings.login_prompt)
+    const validationMessage = ref(strings.unsuccesfull_validation_login)
     const formValues = ref<Record<string, unknown>>({})
     const updatedValues = ref()
     const authMethod = ref('signIn')

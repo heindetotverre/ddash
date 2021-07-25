@@ -1,0 +1,9 @@
+{
+  "add_list": "Add list",
+  "log_out": "Log out",
+  "log_in": "Log in",
+  "try_again": "Click here to try again",
+  "login_prompt": "To save your list you have to login",
+  "unsuccesfull_validation_login": "Please enter your credentials",
+  "unsuccesfull_validation_list": "Please enter selectors"
+}

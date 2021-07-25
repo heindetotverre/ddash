@@ -23,24 +23,26 @@
             @click="addList"
             iconType="link"
             image="add-rounded"
-            text="Add list"
+            :text="strings.add_list"
           />
         </div>
       </div>
     </div>
-    <Modal v-if="showLogin">
-      <UserLogin @cancel="cancelLogin" />
-    </Modal>
     <div class="ddash__user user">
       <div v-if="user.userId" class="user user--present">
         <Icon
           @click="signOut"
           iconType="link"
           image="sign-out"
-          text="Log out"
+          :text="strings.log_out"
         />
         <div class="user__info">
-          <span>{{ user.firstName }} {{ user.lastName }}</span>
+          <Icon
+            iconType="link"
+            image="user"
+            :text="`${user.firstName} ${user.lastName}`"
+          />
+          <span></span>
         </div>
       </div>
       <Icon
@@ -48,9 +50,12 @@
         @click="signIn"
         iconType="link"
         image="add-rounded"
-        text="Log in"
+        :text="strings.log_in"
       />
     </div>
+    <Modal v-if="showLogin">
+      <UserLogin @cancel="cancelLogin" />
+    </Modal>
   </section>
 </template>
 
@@ -59,9 +64,10 @@ import { defineComponent, ref, computed, onMounted } from 'vue'
 import { ListComponent, User } from '@/types/types'
 import { listStore } from '@/store/lists'
 import { userStore } from '@/store/user'
-import List from '@/components/list.vue'
+import { stringStore } from '@/store/strings'
+import List from '@/components/list/list.vue'
 import Icon from '@/components/layout/icon.vue'
-import UserLogin from '@/components/user.vue'
+import UserLogin from '@/components/user/userLogin.vue'
 import Modal from '@/components/layout/modal.vue'
 
 export default defineComponent({
@@ -76,6 +82,7 @@ export default defineComponent({
     const newLists = ref<Array<ListComponent>>([])
     const showLogin = ref(false)
     const userInfo = userStore.get.user as User
+    const strings = stringStore.get.getStrings
 
     const addList = () => {
       newLists.value.push({
@@ -129,6 +136,7 @@ export default defineComponent({
       showLogin,
       signIn,
       signOut,
+      strings,
       user
     }
   }
