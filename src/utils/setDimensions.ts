@@ -1,26 +1,29 @@
 import { nextTick } from "vue"
+import { DimensionChangePayload } from '@/types/types'
 
-const maxHeight = 800
 const width = 300
 
-const setDimensions = async (
-  editDimension: string,
-  animateElement: HTMLElement,
-  contentElement: HTMLElement,
-  data: number | void
+const setDimensionsUtil = async (dimensionsPayload: DimensionChangePayload
 ): Promise<void> => {
-  await nextTick()
-  if (typeof data === 'number') {
-    editDimension === 'height'
-      ? animateElement.style.height = data + 'px'
-      : animateElement.style.width = data + 'px'
-  } else {
-    editDimension === 'height'
-      ? contentElement.clientHeight > maxHeight
-        ? (animateElement.style.height = maxHeight + 'px')
-        : (animateElement.style.height = contentElement.clientHeight + 'px')
-      : (animateElement.style.width = width + 'px')
+  const setHeight = () => {
+    dimensionsPayload.animateElement.style.height = typeof dimensionsPayload.value === 'number' ? dimensionsPayload.value + 'px' : dimensionsPayload.contentElement.clientHeight + 'px'
   }
+
+  const setWidth = () => {
+    dimensionsPayload.animateElement.style.width = typeof dimensionsPayload.value === 'number' ? dimensionsPayload.value + 'px' : width + 'px'
+  }
+
+  const setBoth = () => {
+    setHeight()
+    setWidth()
+  }
+
+  await nextTick()
+  dimensionsPayload.editDimension === 'height'
+    ? setHeight()
+    : dimensionsPayload.editDimension === 'width'
+      ? setWidth()
+      : setBoth()
 }
 
-export default { setDimensions }
+export { setDimensionsUtil }

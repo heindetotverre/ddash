@@ -10,14 +10,18 @@ const state = reactive({
   ...initialState
 })
 
-const getListFromUrl = async (payload: CrawlData, newList: boolean | void) => {
+const setListsToBePulled = (payload: CrawlData,) => {
   const existingList = state.listsBeingPulled.find(l => l.listId === payload.listId)
-  if (!existingList && !newList) {
+  if (!existingList) {
     state.listsBeingPulled.push({
       ...payload,
       listId: payload.listId
     })
+    return
   }
+}
+
+const pullListFromUrl = async (payload: CrawlData) => {
   const url = new URL(window.location.href)
   const endPoint = `http://${url.hostname}:${process.env.VUE_APP_SERVERPORT}/lists/crawl`
   try {
@@ -46,13 +50,16 @@ const saveList = async (payload: CrawlData) => {
   }
 }
 
-const deleteList = async (payload: string) => {
-  const url = new URL(window.location.href)
-  const endPoint = `http://${url.hostname}:${process.env.VUE_APP_SERVERPORT}/lists/delete`
-  try {
-    await axios.post(endPoint, payload)
-  } catch (error) {
-    return { status: 'failed', message: error }
+const deleteList = async (id: string) => {
+  const listFromDB = state.listsBeingPulled.find(l => l.listId === id)
+  if (listFromDB) {
+    const url = new URL(window.location.href)
+    const endPoint = `http://${url.hostname}:${process.env.VUE_APP_SERVERPORT}/lists/delete`
+    try {
+      await axios.post(endPoint, { id: id })
+    } catch (error) {
+      return { status: 'failed', message: error }
+    }
   }
 }
 
@@ -63,11 +70,11 @@ const getAllLists = async (payload: string) => {
     const getListsResult = await axios.post(endPoint, { payload }) as AxiosResponse
     if (getListsResult.data.lists.length) {
       const lists = getListsResult.data.lists as Array<CrawlData>
-      lists.forEach(l => {
-        getListFromUrl({
-          ...l,
+      lists.forEach(list => {
+        setListsToBePulled({
+          ...list,
           searchParams: {
-            ...l.searchParams,
+            ...list.searchParams,
             saveList: false
           }
         })
@@ -93,7 +100,7 @@ export const listStore = readonly({
   },
   do: {
     getAllLists,
-    getListFromUrl,
+    pullListFromUrl,
     deleteList,
     reset
   }

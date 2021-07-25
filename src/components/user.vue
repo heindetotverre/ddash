@@ -28,21 +28,20 @@
     </div>
   </div>
 </template>
-
 <script lang="ts">
-import { defineComponent, ref, nextTick, onMounted } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import { userStore } from '@/store/user'
 import Forms from '@/components/factory/forms.vue'
 import { mapping } from '@/maps/mapping'
+import { setDimensionsUtil } from '@/utils/setDimensions'
 import {
   FormEvent,
   FormEvaluationEvent,
   AuthLogin,
   AuthCreateUser,
-  ApiResponse
+  ApiResponse,
+  DimensionChangePayload
 } from '@/types/types'
-
-const maxHeight = 600
 
 export default defineComponent({
   name: 'ddashUser',
@@ -64,6 +63,9 @@ export default defineComponent({
     const contentRef = ref()
     const animateRef = ref()
 
+    const setDimensions: (dimensionsPayload: DimensionChangePayload) => void =
+      setDimensionsUtil
+
     const targetFunctionEvaluation = (targetFunction: string) => {
       if (targetFunction === 'cancelSignIn') {
         close()
@@ -71,7 +73,12 @@ export default defineComponent({
       authMethod.value === targetFunction
         ? auth()
         : ((authMethod.value = targetFunction), (status.value = 'init'))
-      setHeight()
+
+      setDimensions({
+        animateElement: animateRef.value,
+        contentElement: contentRef.value,
+        editDimension: 'height'
+      })
     }
 
     const auth = async () => {
@@ -85,20 +92,28 @@ export default defineComponent({
           method: authMethod.value,
           values: authInfo
         })) as ApiResponse
-        console.log(result)
         if (result.status === 'success') {
           close()
         }
         if (result.status === 'failed') {
-          updatedValues.value = {
-            ...formValues,
-            email: '',
-            password: '',
-            passwordCheck: ''
-          }
+          updatedValues.value =
+            authMethod.value === 'signUp'
+              ? {
+                  ...formValues,
+                  email: '',
+                  password: '',
+                  passwordCheck: ''
+                }
+              : {
+                  password: ''
+                }
           validationMessage.value = result.message
           status.value = 'unvalidated'
-          setHeight()
+          setDimensions({
+            animateElement: animateRef.value,
+            contentElement: contentRef.value,
+            editDimension: 'height'
+          })
         }
       } else {
         status.value = 'unvalidated'
@@ -106,7 +121,12 @@ export default defineComponent({
     }
 
     const close = () => {
-      setHeight(0)
+      setDimensions({
+        animateElement: animateRef.value,
+        contentElement: contentRef.value,
+        editDimension: 'height',
+        value: 0
+      })
       setTimeout(() => {
         emit('cancel')
       }, 150)
@@ -114,20 +134,12 @@ export default defineComponent({
 
     const formInput = (formInput: FormEvent) => {
       formValues.value[formInput.field] = formInput.value
-      status.value = 'init'
-      setHeight()
-    }
-
-    const setHeight = async (data: number | void) => {
-      await nextTick()
-      if (typeof data === 'number') {
-        animateRef.value.style.height = data + 'px'
-      } else {
-        contentRef.value.clientHeight > maxHeight
-          ? (animateRef.value.style.height = maxHeight + 'px')
-          : (animateRef.value.style.height =
-              contentRef.value.clientHeight + 'px')
-      }
+      status.value === 'unvalidated' ? (status.value = 'init') : false
+      setDimensions({
+        animateElement: animateRef.value,
+        contentElement: contentRef.value,
+        editDimension: 'height'
+      })
     }
 
     const validate = (data: FormEvaluationEvent) => {
@@ -135,7 +147,11 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      setHeight()
+      setDimensions({
+        animateElement: animateRef.value,
+        contentElement: contentRef.value,
+        editDimension: 'height'
+      })
     })
 
     return {

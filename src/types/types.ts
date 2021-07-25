@@ -135,6 +135,13 @@ interface ApiResponse {
   reason?: string,
 }
 
+interface DimensionChangePayload {
+  editDimension: string,
+  animateElement: HTMLElement,
+  contentElement: HTMLElement,
+  value?: number | void
+}
+
 export {
   List,
   CrawlData,
@@ -153,5 +160,6 @@ export {
   AuthLogin,
   AuthCreateUser,
   User,
-  ApiResponse
+  ApiResponse,
+  DimensionChangePayload
 }

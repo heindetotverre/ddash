@@ -45,7 +45,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, nextTick, onMounted, watch } from 'vue'
+import { defineComponent, ref, onMounted, watch } from 'vue'
 import { listStore } from '@/store/lists'
 import { formStore } from '@/store/forms'
 import {
@@ -53,15 +53,16 @@ import {
   ListContent,
   CrawlData,
   FormEvaluationEvent,
-  FormEvent,
-  FormObject
+  FormObject,
+  DimensionChangePayload
 } from '@/types/types'
 import { mapping } from '@/maps/mapping'
 import Forms from '@/components/factory/forms.vue'
 import IconList from '@/components/factory/icons.vue'
+import { setDimensionsUtil } from '@/utils/setDimensions'
 
-const width = 300
-const maxHeight = 800
+const fetchTime = 100000 // 200000 = ~ 3 min
+const maxHeight = window.innerHeight
 const initialListHeight = 37
 
 export default defineComponent({
@@ -97,9 +98,13 @@ export default defineComponent({
     const formSchema = ref(mapping('forms', 'CreateList'))
 
     let crawlData = {} as CrawlData
+    let startedInterval = false
 
     const contentRef = ref()
     const animateRef = ref()
+
+    const setDimensions: (dimensionsPayload: DimensionChangePayload) => void =
+      setDimensionsUtil
 
     const targetFunction = (data: string) => {
       data === 'createList'
@@ -109,57 +114,76 @@ export default defineComponent({
         : data === 'removeList'
         ? removeList()
         : data === 'getList'
-        ? getList(true)
+        ? getList()
         : false
     }
 
     const createList = async () => {
       validated.value = false
       status.value = 'create'
-      setHeight()
-      setWidth(width)
+      setDimensions({
+        animateElement: animateRef.value,
+        contentElement: contentRef.value,
+        editDimension: 'both'
+      })
     }
 
     const cancelList = () => {
-      setHeight(initialListHeight)
+      setDimensions({
+        animateElement: animateRef.value,
+        contentElement: contentRef.value,
+        value: initialListHeight,
+        editDimension: 'height'
+      })
       setTimeout(() => {
         status.value = 'init'
       }, 150)
     }
 
     const removeList = () => {
-      setHeight(0)
-      setWidth(0)
+      setDimensions({
+        animateElement: animateRef.value,
+        contentElement: contentRef.value,
+        editDimension: 'both',
+        value: 0
+      })
       setTimeout(() => {
         emit('removeList', props.listId)
       }, 150)
     }
 
-    const getList = async (newList: boolean | void) => {
+    const getList = async () => {
       if (!validated.value) {
         message.value = 'Please enter selectors'
         status.value = 'unvalidated'
-        setHeight()
-        setWidth(width)
+        setDimensions({
+          animateElement: animateRef.value,
+          contentElement: contentRef.value,
+          editDimension: 'height'
+        })
         return
       }
       status.value = 'busy'
-      setHeight()
       try {
-        const result = (await listStore.do.getListFromUrl(
-          crawlData,
-          newList
-        )) as List
+        const result = (await listStore.do.pullListFromUrl(crawlData)) as List
         ddashList.value = result.listContent
         animateRef.value.style.overflowY = 'auto'
         status.value = 'ready'
-        setHeight()
-        setWidth(width)
+        setDimensions({
+          animateElement: animateRef.value,
+          contentElement: contentRef.value,
+          editDimension: 'height',
+          value: maxHeight
+        })
+        intervalFetch()
       } catch (error) {
         message.value = error.response ? error.response.data.message : error
         status.value = 'error'
-        setHeight()
-        setWidth(width)
+        setDimensions({
+          animateElement: animateRef.value,
+          contentElement: contentRef.value,
+          editDimension: 'height'
+        })
       }
     }
 
@@ -179,35 +203,20 @@ export default defineComponent({
         : (validated.value = data.validationStatus)
     }
 
-    const formInput = (formInput: FormEvent) => {
-      status.value = 'create'
-      setHeight()
+    const formInput = () => {
+      status.value === 'unvalidated'
+        ? ((status.value = 'create'),
+          setDimensions({
+            animateElement: animateRef.value,
+            contentElement: contentRef.value,
+            editDimension: 'height'
+          }))
+        : (status.value = 'create')
     }
 
     const formClick = (data: string) => {
       if (data === 'saveList' && props.user && !props.user.userId) {
         emit('signIn', true)
-      }
-    }
-
-    const setHeight = async (data: number | void) => {
-      await nextTick()
-      if (typeof data === 'number') {
-        animateRef.value.style.height = data + 'px'
-      } else {
-        contentRef.value.clientHeight > maxHeight
-          ? (animateRef.value.style.height = maxHeight + 'px')
-          : (animateRef.value.style.height =
-              contentRef.value.clientHeight + 'px')
-      }
-    }
-
-    const setWidth = async (data: number | void) => {
-      await nextTick()
-      if (typeof data === 'number') {
-        animateRef.value.style.width = data + 'px'
-      } else {
-        animateRef.value.style.width = contentRef.value.clientWidth + 'px'
       }
     }
 
@@ -235,9 +244,17 @@ export default defineComponent({
       }
     }
 
+    const intervalFetch = () => {
+      if (crawlData && !startedInterval) {
+        startedInterval = true
+        setInterval(() => {
+          getList()
+        }, fetchTime)
+      }
+    }
+
     watch(props, () => {
       updateSaveList()
-
       if (props.crawlData) {
         crawlData = props.crawlData as CrawlData
         getList()
@@ -246,8 +263,11 @@ export default defineComponent({
 
     onMounted(() => {
       updateSaveList()
-      setHeight()
-      setWidth(width)
+      setDimensions({
+        animateElement: animateRef.value,
+        contentElement: contentRef.value,
+        editDimension: 'both'
+      })
 
       if (props.crawlData) {
         crawlData = props.crawlData as CrawlData

@@ -168,9 +168,7 @@ export default defineComponent({
           ...props.updatedFormValues
         } as Record<string, unknown>
         formValues.value = form
-      }
 
-      if (props.updatedFormValues) {
         props.updatedFormValues.clear ? (formValues.value = {}) : false
       }
 

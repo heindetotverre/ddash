@@ -89,6 +89,7 @@ export default defineComponent({
         return list.listId !== id
       })
       newLists.value = filteredList
+      listStore.do.deleteList(id)
     }
 
     const signIn = (data: boolean) => {

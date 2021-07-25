@@ -5,7 +5,8 @@ import axios, { AxiosResponse } from 'axios'
 
 const initialState = {
   user: {},
-  url: new URL(window.location.href)
+  url: new URL(window.location.href),
+  settings: {}
 }
 
 const state = reactive({

@@ -148,10 +148,32 @@ app.post('/lists/save', async (req, res) => {
       ...req.body,
       listId: uuidCreation()
     })
+    res.status(200).json({
+      status: 'success', message: 'List saved'
+    })
     client.close()
   } catch (error) {
     res.status(500).json({
       status: 'failed', message: `/lists/save error occurred: ${error}`
+    })
+  }
+})
+
+app.post('/lists/delete', async (req, res) => {
+  try {
+    const client = await connect(res)
+    const db = client.db(process.env.DB_NAME)
+    const collection = db.collection('Lists')
+    const payload = req.body
+
+    await collection.deleteOne({ listId: payload.id })
+    res.status(200).json({
+      status: 'success', message: 'List deleted'
+    })
+    client.close()
+  } catch (error) {
+    res.status(500).json({
+      status: 'failed', message: `/lists/delete error occurred: ${error}`
     })
   }
 })
